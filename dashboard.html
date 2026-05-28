@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Dashboard</title>
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>
+        Welcome {{ username }}
+    </h1>
+
+    <h2>
+        📚 AI Smart Study Planner
+    </h2>
+
+    <hr>
+
+    <h2>
+        ⏱️ Study Timer
+    </h2>
+
+    <h1 id="timer">
+        00:00:00
+    </h1>
+
+    <br>
+
+    <h2>
+        📚 Select Subject
+    </h2>
+
+    <select id="subjectSelect">
+
+    </select>
+
+    <br><br>
+
+    <button id="startBtn">
+        ▶ Start Study
+    </button>
+
+    <button id="endBtn">
+        ⏹ End Study
+    </button>
+
+    <hr>
+
+    <h2>
+        📋 Study Features
+    </h2>
+
+    <br>
+
+    <a href="/timetable">
+
+        <button>
+            📚 Subject Wise Timetable
+        </button>
+
+    </a>
+
+    <a href="/notes">
+
+        <button>
+            📝 Notes / Diary
+        </button>
+
+    </a>
+
+    <a href="/result">
+
+        <button>
+            📊 Study Result
+        </button>
+
+    </a>
+
+    <hr>
+
+    <h2>
+        📅 Exam Countdown
+    </h2>
+
+    <input type="date"
+    id="examDate">
+
+    <br><br>
+
+    <button onclick="saveExamDate()">
+
+        💾 Save Exam Date
+
+    </button>
+
+    <br><br>
+
+    <h2 id="countdownText">
+
+    </h2>
+
+    <hr>
+
+    <h2>
+        📅 Saved Timetable
+    </h2>
+
+    <div id="showSavedTimetable">
+
+    </div>
+
+    <hr>
+
+    <a href="/logout">
+
+        <button>
+            🚪 Logout
+        </button>
+
+    </a>
+
+</div>
+
+<script>
+
+// =========================
+// LOAD USER SUBJECTS
+// =========================
+
+let subjectDropdown =
+
+document.getElementById(
+"subjectSelect"
+);
+
+let savedSubjects =
+
+JSON.parse(
+
+localStorage.getItem(
+"subjects_" + "{{ username }}"
+)
+
+);
+
+if(savedSubjects){
+
+    savedSubjects.forEach(function(sub){
+
+        let option =
+
+        document.createElement(
+            "option"
+        );
+
+        option.text = sub;
+
+        subjectDropdown.add(
+            option
+        );
+
+    });
+
+}
+
+// =========================
+// LOAD USER TIMETABLE
+// =========================
+
+window.onload = function(){
+
+    let savedData =
+
+    localStorage.getItem(
+    "savedTimetable_" + "{{ username }}"
+    );
+
+    let nextdayData =
+
+    localStorage.getItem(
+    "savedNextday_" + "{{ username }}"
+    );
+
+    if(savedData){
+
+        document.getElementById(
+        "showSavedTimetable"
+        ).innerHTML +=
+
+        "<h2>📅 Today Timetable</h2>"
+
+        + savedData;
+    }
+
+    if(nextdayData){
+
+        document.getElementById(
+        "showSavedTimetable"
+        ).innerHTML +=
+
+        "<h2>📅 Next Day Timetable</h2>"
+
+        + nextdayData;
+    }
+
+}
+
+// =========================
+// EXAM DATE SAVE
+// =========================
+
+function saveExamDate(){
+
+let examDate =
+
+document.getElementById(
+"examDate"
+).value;
+
+localStorage.setItem(
+
+"examDate_" + "{{ username }}",
+
+examDate
+
+);
+
+showCountdown();
+
+}
+
+// =========================
+// SHOW COUNTDOWN
+// =========================
+
+function showCountdown(){
+
+let savedDate =
+
+localStorage.getItem(
+"examDate_" + "{{ username }}"
+);
+
+if(savedDate){
+
+let exam =
+
+new Date(savedDate);
+
+let today =
+
+new Date();
+
+let difference =
+
+exam - today;
+
+let daysLeft =
+
+Math.floor(
+
+difference /
+
+(1000 * 60 * 60 * 24)
+
+);
+
+if(daysLeft >= 0){
+
+document.getElementById(
+"countdownText"
+).innerHTML =
+
+"⏳ " +
+
+daysLeft +
+
+" Days Left For Exam";
+
+}
+
+else{
+
+document.getElementById(
+"countdownText"
+).innerHTML =
+
+"❌ Exam Date Passed";
+
+}
+
+}
+
+}
+
+// =========================
+// AUTO LOAD COUNTDOWN
+// =========================
+
+showCountdown();
+
+// =========================
+// TIMER
+// =========================
+
+let timer =
+document.getElementById(
+"timer"
+);
+
+let seconds = 0;
+
+let interval;
+
+let startTime;
+
+document.getElementById(
+"startBtn"
+).onclick = function(){
+
+    startTime =
+    new Date().getTime();
+
+    localStorage.setItem(
+
+        "studyStart_" + "{{ username }}",
+
+        startTime
+
+    );
+
+    let subject =
+
+    document.getElementById(
+    "subjectSelect"
+    ).value;
+
+    localStorage.setItem(
+
+        "studySubject_" + "{{ username }}",
+
+        subject
+
+    );
+
+    interval = setInterval(function(){
+
+        seconds++;
+
+        let hrs =
+
+        Math.floor(
+            seconds / 3600
+        );
+
+        let mins =
+
+        Math.floor(
+            (seconds % 3600) / 60
+        );
+
+        let secs =
+
+        seconds % 60;
+
+        timer.innerHTML =
+
+        String(hrs).padStart(2,'0')
+
+        + ":" +
+
+        String(mins).padStart(2,'0')
+
+        + ":" +
+
+        String(secs).padStart(2,'0');
+
+    },1000);
+
+};
+
+document.getElementById(
+"endBtn"
+).onclick = function(){
+
+    clearInterval(interval);
+
+    let endTime =
+    new Date().getTime();
+
+    let savedStart =
+
+    localStorage.getItem(
+    "studyStart_" + "{{ username }}"
+    );
+
+    let totalMinutes =
+
+    Math.floor(
+
+        (endTime - savedStart)
+
+        / 1000 / 60
+
+    );
+
+    let studiedSubject =
+
+    localStorage.getItem(
+        "studySubject_" + "{{ username }}"
+    );
+
+    // =====================
+    // MULTIPLE SUBJECT SAVE
+    // =====================
+
+    let allSubjects =
+
+    JSON.parse(
+
+    localStorage.getItem(
+    "allSubjects_" + "{{ username }}"
+    )
+
+    ) || [];
+
+    allSubjects.push({
+
+    subject: studiedSubject,
+
+    minutes: totalMinutes
+
+    });
+
+    localStorage.setItem(
+
+    "allSubjects_" + "{{ username }}",
+
+    JSON.stringify(allSubjects)
+
+    );
+
+    // =====================
+    // TOTAL TIME
+    // =====================
+
+    let oldMinutes =
+
+    parseInt(
+
+    localStorage.getItem(
+    "studyMinutes_" + "{{ username }}"
+    )
+
+    ) || 0;
+
+    let newMinutes =
+
+    oldMinutes + totalMinutes;
+
+    localStorage.setItem(
+
+    "studyMinutes_" + "{{ username }}",
+
+    newMinutes
+
+    );
+
+    // =====================
+    // PROGRESS
+    // =====================
+
+    let progress =
+
+    Math.min(
+
+        newMinutes * 2,
+
+        100
+
+    );
+
+    localStorage.setItem(
+
+        "studyProgress_" + "{{ username }}",
+
+        progress
+
+    );
+
+    alert(
+
+        studiedSubject +
+
+        " studied for " +
+
+        totalMinutes +
+
+        " minutes 😎"
+
+    );
+
+};
+
+</script>
+
+</body>
+
+</html>

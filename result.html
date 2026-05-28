@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>
+Study Result
+</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>
+📊 Study Analytics
+</h1>
+
+<h2>
+✅ Study Session Completed
+</h2>
+
+<p>
+Your study progress is improving 😄
+</p>
+
+<hr>
+
+<h2>
+📚 Studied Subjects
+</h2>
+
+<div id="subjectHistory">
+
+</div>
+
+<hr>
+
+<h2>
+⏱️ Actual Study Time
+</h2>
+
+<h1 id="realStudy">
+
+0 Minutes
+
+</h1>
+
+<br>
+
+<div style="width:80%;
+background:white;
+border-radius:20px;
+margin:auto;">
+
+<div id="progressBar"
+
+style="height:30px;
+width:0%;
+background:#0d8cf0;
+border-radius:20px;">
+
+</div>
+
+</div>
+
+<br>
+
+<h2 id="progressText">
+
+Progress: 0%
+
+</h2>
+
+<hr>
+
+<h2 id="motivationMessage">
+
+</h2>
+
+<hr>
+
+<h2>
+📅 Enter Exam Date
+</h2>
+
+<input type="date"
+id="examDate">
+
+<br><br>
+
+<button onclick="showCountdown()">
+
+⏳ Show Countdown
+
+</button>
+
+<br><br>
+
+<h2 id="examCountdown">
+
+</h2>
+
+<br>
+
+<a href="/dashboard">
+
+<button>
+🔙 Back Dashboard
+</button>
+
+</a>
+
+</div>
+
+<script>
+
+// =========================
+// USERNAME
+// =========================
+
+let username =
+"{{ session['user'] }}";
+
+// =========================
+// LOAD SUBJECT HISTORY
+// =========================
+
+let historyData =
+
+JSON.parse(
+
+localStorage.getItem(
+"allSubjects_" + username
+)
+
+) || [];
+
+let historyBox =
+
+document.getElementById(
+"subjectHistory"
+);
+
+let totalAllMinutes = 0;
+
+historyData.forEach(function(item){
+
+totalAllMinutes += item.minutes;
+
+historyBox.innerHTML +=
+
+`
+<div class="box">
+
+<h2>
+📚 ${item.subject}
+</h2>
+
+<p>
+⏱️ ${item.minutes} Minutes
+</p>
+
+</div>
+`;
+
+});
+
+// =========================
+// TOTAL TIME
+// =========================
+
+document.getElementById(
+"realStudy"
+).innerHTML =
+
+totalAllMinutes +
+
+" Minutes";
+
+// =========================
+// PROGRESS
+// =========================
+
+let progress =
+
+Math.min(
+
+totalAllMinutes * 2,
+
+100
+
+);
+
+document.getElementById(
+"progressBar"
+).style.width =
+
+progress + "%";
+
+document.getElementById(
+"progressText"
+).innerHTML =
+
+"Progress: " +
+
+progress +
+
+"%";
+
+// =========================
+// AI MOTIVATION MESSAGE
+// =========================
+
+let message = "";
+
+if(totalAllMinutes < 10){
+
+message =
+"🙂 Good Start! Keep studying.";
+
+}
+
+else if(totalAllMinutes < 60){
+
+message =
+"🔥 Great Job! You are improving daily.";
+
+}
+
+else{
+
+message =
+"🏆 Excellent! You are a study machine.";
+
+}
+
+document.getElementById(
+"motivationMessage"
+).innerHTML =
+
+message;
+
+// =========================
+// EXAM COUNTDOWN
+// =========================
+
+function showCountdown(){
+
+let examDate =
+
+document.getElementById(
+"examDate"
+).value;
+
+let exam =
+
+new Date(examDate);
+
+let today =
+
+new Date();
+
+let difference =
+
+exam - today;
+
+let daysLeft =
+
+Math.floor(
+
+difference /
+
+(1000 * 60 * 60 * 24)
+
+);
+
+if(daysLeft >= 0){
+
+document.getElementById(
+"examCountdown"
+).innerHTML =
+
+"⏳ " +
+
+daysLeft +
+
+" Days Left For Exam";
+
+}
+
+else{
+
+document.getElementById(
+"examCountdown"
+).innerHTML =
+
+"❌ Exam Date Passed";
+
+}
+
+}
+
+</script>
+
+</body>
+
+</html>
